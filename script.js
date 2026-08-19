@@ -131,8 +131,10 @@ function setupEventListeners() {
 // ==========================================================================
 function initTheme() {
   const saved = localStorage.getItem(THEME_KEY);
-  if (saved) {
-    document.documentElement.setAttribute('data-theme', saved);
+  if (saved === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  } else {
+    document.documentElement.setAttribute('data-theme', 'light');
   }
 }
 
