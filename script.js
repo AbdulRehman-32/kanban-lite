@@ -1,45 +1,42 @@
 /**
- * Interactive Task Board - Kanban Lite
- * Clean Vanilla JavaScript (ES6+) State Management & Interactivity
+ * Interactive Task Board
+ * Plain JavaScript (ES6+) State Management & Interactivity
  */
 
-// Initial Seed Tasks (shown when local storage is empty)
+// Default tasks for first-time load
 const DEFAULT_TASKS = [
   {
     id: '1',
-    title: 'Design UI Mockups in Figma',
-    description: 'Create high-fidelity wireframes and mobile responsive layouts for the dashboard.',
+    title: 'Design UI Mockups',
+    description: 'Create clean wireframes and responsive layout for the dashboard.',
     category: 'Design',
     priority: 'High',
-    status: 'todo',
-    createdAt: new Date().toISOString()
+    status: 'todo'
   },
   {
     id: '2',
     title: 'Implement Kanban Drag and Drop',
-    description: 'Use native HTML5 Drag and Drop API to move cards smoothly between columns.',
+    description: 'Use native HTML5 Drag and Drop API to move tasks between columns.',
     category: 'Development',
     priority: 'High',
-    status: 'in-progress',
-    createdAt: new Date().toISOString()
+    status: 'in-progress'
   },
   {
     id: '3',
     title: 'Setup GitHub Pages Deployment',
-    description: 'Configure repository settings and publish live static build on GitHub Pages.',
-    category: 'Marketing',
+    description: 'Configure repository settings and publish live static site.',
+    category: 'General',
     priority: 'Medium',
-    status: 'completed',
-    createdAt: new Date().toISOString()
+    status: 'completed'
   }
 ];
 
-// Application State
+// Application state
 let tasks = [];
-const STORAGE_KEY = 'kanban_tasks';
-const THEME_KEY = 'kanban_theme';
+const STORAGE_KEY = 'tasks_data';
+const THEME_KEY = 'site_theme';
 
-// DOM Element References
+// DOM elements
 const taskForm = document.getElementById('task-form');
 const taskTitle = document.getElementById('task-title');
 const taskDescription = document.getElementById('task-description');
@@ -53,16 +50,13 @@ const priorityFilter = document.getElementById('priority-filter');
 const resetFiltersBtn = document.getElementById('reset-filters-btn');
 
 const themeToggleBtn = document.getElementById('theme-toggle-btn');
-const boardContainer = document.getElementById('kanban-board');
 
-// Column Task Lists
 const lists = {
   'todo': document.getElementById('list-todo'),
   'in-progress': document.getElementById('list-in-progress'),
   'completed': document.getElementById('list-completed')
 };
 
-// Column Empty State Indicators
 const emptyMessages = {
   'todo': document.getElementById('empty-todo'),
   'in-progress': document.getElementById('empty-in-progress'),
@@ -80,9 +74,6 @@ document.addEventListener('DOMContentLoaded', () => {
   renderTasks();
 });
 
-/**
- * Load tasks from LocalStorage or initialize with defaults
- */
 function loadTasks() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -92,31 +83,23 @@ function loadTasks() {
       tasks = [...DEFAULT_TASKS];
       saveTasks();
     }
-  } catch (error) {
-    console.error('Error loading tasks from localStorage:', error);
+  } catch (err) {
+    console.error('Error loading tasks:', err);
     tasks = [...DEFAULT_TASKS];
   }
 }
 
-/**
- * Save current tasks array to LocalStorage
- */
 function saveTasks() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
-  } catch (error) {
-    console.error('Error saving tasks to localStorage:', error);
+  } catch (err) {
+    console.error('Error saving tasks:', err);
   }
 }
 
-/**
- * Setup Event Listeners for Forms & Filters
- */
 function setupEventListeners() {
-  // Form submission
   taskForm.addEventListener('submit', handleAddTask);
 
-  // Search input & clear button
   searchInput.addEventListener('input', () => {
     clearSearchBtn.classList.toggle('visible', searchInput.value.trim().length > 0);
     renderTasks();
@@ -129,11 +112,9 @@ function setupEventListeners() {
     renderTasks();
   });
 
-  // Filter dropdowns
   categoryFilter.addEventListener('change', renderTasks);
   priorityFilter.addEventListener('change', renderTasks);
 
-  // Reset Filters
   resetFiltersBtn.addEventListener('click', () => {
     searchInput.value = '';
     clearSearchBtn.classList.remove('visible');
@@ -142,39 +123,29 @@ function setupEventListeners() {
     renderTasks();
   });
 
-  // Theme Toggle Button
   themeToggleBtn.addEventListener('click', toggleTheme);
 }
 
 // ==========================================================================
-// Theme Management (Light / Dark Mode)
+// Theme
 // ==========================================================================
 function initTheme() {
-  const savedTheme = localStorage.getItem(THEME_KEY);
-  if (savedTheme) {
-    document.documentElement.setAttribute('data-theme', savedTheme);
-  } else {
-    // Check user system preference
-    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const initialTheme = prefersDark ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-theme', initialTheme);
+  const saved = localStorage.getItem(THEME_KEY);
+  if (saved) {
+    document.documentElement.setAttribute('data-theme', saved);
   }
 }
 
 function toggleTheme() {
-  const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', newTheme);
-  localStorage.setItem(THEME_KEY, newTheme);
+  const current = document.documentElement.getAttribute('data-theme') || 'light';
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem(THEME_KEY, next);
 }
 
 // ==========================================================================
-// Task CRUD Operations
+// Task CRUD
 // ==========================================================================
-
-/**
- * Handle new task submission
- */
 function handleAddTask(e) {
   e.preventDefault();
 
@@ -183,32 +154,25 @@ function handleAddTask(e) {
   const category = taskCategory.value;
   const priority = taskPriority.value;
 
-  if (!title || !category || !priority) {
-    return;
-  }
+  if (!title || !category || !priority) return;
 
   const newTask = {
-    id: 'task_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+    id: 't_' + Date.now(),
     title,
     description,
     category,
     priority,
-    status: 'todo',
-    createdAt: new Date().toISOString()
+    status: 'todo'
   };
 
-  tasks.unshift(newTask); // Add to beginning
+  tasks.unshift(newTask);
   saveTasks();
   renderTasks();
 
-  // Reset form
   taskForm.reset();
   taskTitle.focus();
 }
 
-/**
- * Update task status (To Do / In Progress / Completed)
- */
 function updateTaskStatus(id, newStatus) {
   const validStatuses = ['todo', 'in-progress', 'completed'];
   if (!validStatuses.includes(newStatus)) return;
@@ -224,9 +188,6 @@ function updateTaskStatus(id, newStatus) {
   renderTasks();
 }
 
-/**
- * Delete a task by ID
- */
 function deleteTask(id) {
   tasks = tasks.filter(task => task.id !== id);
   saveTasks();
@@ -234,39 +195,33 @@ function deleteTask(id) {
 }
 
 // ==========================================================================
-// Rendering & Filtering
+// Rendering
 // ==========================================================================
-
-/**
- * Render all tasks to their respective columns based on filters
- */
 function renderTasks() {
   const searchTerm = searchInput.value.trim().toLowerCase();
   const selectedCategory = categoryFilter.value;
   const selectedPriority = priorityFilter.value;
 
-  // Clear all column lists
+  // Clear lists
   Object.values(lists).forEach(list => {
     if (list) list.innerHTML = '';
   });
 
-  // Track counts
   const counts = { 'todo': 0, 'in-progress': 0, 'completed': 0 };
 
-  // Filter tasks
-  const filteredTasks = tasks.filter(task => {
+  // Filter
+  const filtered = tasks.filter(task => {
     const matchesSearch = 
       task.title.toLowerCase().includes(searchTerm) || 
       (task.description && task.description.toLowerCase().includes(searchTerm));
-    
     const matchesCategory = selectedCategory === 'All' || task.category === selectedCategory;
     const matchesPriority = selectedPriority === 'All' || task.priority === selectedPriority;
 
     return matchesSearch && matchesCategory && matchesPriority;
   });
 
-  // Populate columns with filtered task cards
-  filteredTasks.forEach(task => {
+  // Render cards
+  filtered.forEach(task => {
     if (counts[task.status] !== undefined) {
       counts[task.status]++;
     }
@@ -276,76 +231,63 @@ function renderTasks() {
     }
   });
 
-  // Update Column Count Badges
+  // Update counts
   document.getElementById('count-todo').textContent = counts['todo'];
   document.getElementById('count-in-progress').textContent = counts['in-progress'];
   document.getElementById('count-completed').textContent = counts['completed'];
 
-  // Update Empty State Messages
+  // Empty state messages
   ['todo', 'in-progress', 'completed'].forEach(status => {
     if (emptyMessages[status]) {
       emptyMessages[status].classList.toggle('visible', counts[status] === 0);
     }
   });
 
-  // Update Header Stats (Active vs Completed)
+  // Stats in header
   const totalActive = counts['todo'] + counts['in-progress'];
   const totalCompleted = counts['completed'];
-  const activeStatEl = document.getElementById('stat-active');
-  const completedStatEl = document.getElementById('stat-completed');
-  if (activeStatEl) activeStatEl.textContent = totalActive;
-  if (completedStatEl) completedStatEl.textContent = totalCompleted;
+  document.getElementById('stat-active').textContent = totalActive;
+  document.getElementById('stat-completed').textContent = totalCompleted;
 }
 
-/**
- * Create DOM element for a task card
- */
 function createTaskCard(task) {
-  const card = document.createElement('article');
+  const card = document.createElement('div');
   card.className = 'task-card';
   card.setAttribute('data-id', task.id);
   card.setAttribute('data-priority', task.priority);
   card.setAttribute('draggable', 'true');
-  card.setAttribute('tabindex', '0');
 
-  // Drag start & end events on card
   card.addEventListener('dragstart', handleDragStart);
   card.addEventListener('dragend', handleDragEnd);
 
-  const priorityBadgeClass = `badge-priority-${task.priority.toLowerCase()}`;
+  const priorityClass = `tag-priority-${task.priority.toLowerCase()}`;
 
   card.innerHTML = `
-    <div class="task-card-header">
-      <div class="badge-group">
-        <span class="badge ${priorityBadgeClass}">${escapeHtml(task.priority)}</span>
-        <span class="badge badge-category" data-category="${escapeHtml(task.category)}">${escapeHtml(task.category)}</span>
-      </div>
+    <div class="card-top">
+      <span class="tag ${priorityClass}">${escapeHtml(task.priority)}</span>
+      <span class="tag tag-category">${escapeHtml(task.category)}</span>
     </div>
     
-    <h3 class="task-card-title">${escapeHtml(task.title)}</h3>
+    <div class="task-title">${escapeHtml(task.title)}</div>
     
-    ${task.description ? `<p class="task-card-desc">${escapeHtml(task.description)}</p>` : ''}
+    ${task.description ? `<div class="task-desc">${escapeHtml(task.description)}</div>` : ''}
     
-    <div class="task-card-footer">
-      <select class="status-select" aria-label="Change status of ${escapeHtml(task.title)}" data-id="${task.id}">
+    <div class="card-bottom">
+      <select class="status-select" aria-label="Change status" data-id="${task.id}">
         <option value="todo" ${task.status === 'todo' ? 'selected' : ''}>To Do</option>
         <option value="in-progress" ${task.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
         <option value="completed" ${task.status === 'completed' ? 'selected' : ''}>Completed</option>
       </select>
       
-      <button type="button" class="btn-delete" data-id="${task.id}" title="Delete task" aria-label="Delete task: ${escapeHtml(task.title)}">
-        Delete
-      </button>
+      <button type="button" class="btn-delete" data-id="${task.id}">Delete</button>
     </div>
   `;
 
-  // Attach event listener for status select
   const statusSelect = card.querySelector('.status-select');
   statusSelect.addEventListener('change', (e) => {
     updateTaskStatus(task.id, e.target.value);
   });
 
-  // Attach event listener for delete button
   const deleteBtn = card.querySelector('.btn-delete');
   deleteBtn.addEventListener('click', () => {
     deleteTask(task.id);
@@ -355,7 +297,7 @@ function createTaskCard(task) {
 }
 
 // ==========================================================================
-// HTML5 Drag and Drop API
+// Drag and Drop
 // ==========================================================================
 let draggedTaskId = null;
 
@@ -369,8 +311,6 @@ function handleDragStart(e) {
 function handleDragEnd() {
   this.classList.remove('dragging');
   draggedTaskId = null;
-
-  // Remove drag-over class from all columns
   document.querySelectorAll('.column').forEach(col => {
     col.classList.remove('drag-over');
   });
@@ -394,7 +334,6 @@ function setupDragAndDrop() {
     });
 
     column.addEventListener('dragleave', (e) => {
-      // Only remove if leaving the column boundary
       if (!column.contains(e.relatedTarget)) {
         column.classList.remove('drag-over');
       }
@@ -403,7 +342,6 @@ function setupDragAndDrop() {
     column.addEventListener('drop', (e) => {
       e.preventDefault();
       column.classList.remove('drag-over');
-      
       const id = e.dataTransfer.getData('text/plain') || draggedTaskId;
       if (id && targetStatus) {
         updateTaskStatus(id, targetStatus);
@@ -412,9 +350,6 @@ function setupDragAndDrop() {
   });
 }
 
-// ==========================================================================
-// Security & Utilities
-// ==========================================================================
 function escapeHtml(str) {
   if (!str) return '';
   return String(str)
